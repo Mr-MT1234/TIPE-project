@@ -48,7 +48,6 @@ class __State:
         
         
 class ObedientController(Controller):
-
     def __init__(self):
         self.breakTime = 0
         self.a = 0

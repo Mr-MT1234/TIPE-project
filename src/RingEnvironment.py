@@ -19,6 +19,7 @@ tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
 sys.path.append(tools)
 
 __MaxSpeed = 34
+__AccidentDistance = 0.3
 __IDMControllerParams = {
     'a' :               5.0,
     'b' :               5.0,
@@ -28,6 +29,8 @@ __IDMControllerParams = {
     'imperfection' :    1/500
 }
 
+ACTIONS = ['Decelerate', 'NoOp', 'Accelerate']
+
 @dataclass
 class __VehicleState:
     edgeID : str
@@ -36,10 +39,22 @@ class __VehicleState:
     leaderID : str
     leaderSpeed : float
     distanceToLeader : float
+    followerID : str
+    followerSpeed : float
+    distanceToFollower : float
+    
 
 class RingEnv(gym.Env):
     
-    def __init__(self, *, radius, numVehicles, selfDrivingPercentage = 0.05, timeStep = 0.5,saveSpeeds = False, renderMode = 'human'):
+    def __init__(self, *, 
+                 radius,
+                 numVehicles,
+                 selfDrivingPercentage = 0.05,
+                 timeStep = 0.5,
+                 saveSpeeds = False,
+                 selfDrivingAccel = 2,
+                 accidentPunishmeent = -1000,
+                 renderMode = 'human'):
         super().__init__()
         
         assert renderMode in ['human', 'none'] 
@@ -47,6 +62,8 @@ class RingEnv(gym.Env):
         self.numVehicles = numVehicles
         self.radius = radius
         self.selfDrivingNum = int(selfDrivingPercentage * numVehicles)
+        self.selfDrivingAccel = selfDrivingAccel
+        self.accidentPunishment = accidentPunishmeent
         self.metadata['render_modes'] = {'human','none'}
         self.action_space = gym.spaces.MultiDiscrete([3]*self.selfDrivingNum)
         self.observation_space = gym.spaces.Box(
@@ -83,6 +100,7 @@ class RingEnv(gym.Env):
                     v = veh.Vehicle(veh.IDMController(**__IDMControllerParams), None, saveSpeeds)
                     self.vehicles.append(v)
                     traci.vehicle.add(v.id, 'r'+str(j), departPos=i*separation)
+                    traci.vehicle.setSpeedMode(v.id, 0)
                     
         for v in self.vehicles[::int(1/selfDrivingPercentage)]:
             v.controller = veh.ObedientController()
@@ -93,25 +111,101 @@ class RingEnv(gym.Env):
         pass
     
     def step(self, action):
+        accelerations = [(a - 1)*self.selfDrivingAccel for a in action]
+        states = [self.__FetchState(v.id) for v in self.vehicles] 
         
-        observation = 0
-        reward = 0
-        terminated = 0
-        truncated = 0
+        for v,a in zip(self.autoVehicles, accelerations):
+            v.controller.setNextAcceleration(a)
+        
+        for v,s in zip(self.vehicles, states):
+            a = v.controller.calcAcceleration(self.timeStep, s.speed, s.leaderSpeed, s.distanceToLeader)
+            v = s.speed + a*self.timeStep
+            traci.vehicle.setSpeed(v.id, v)
+        
+        traci.simulationStep()
+        
+        terminated = False
+        truncated = False
         info = {}
         done = False
+        
+        
+        newStates = [self.__FetchState(v) for v in self.vehicles]
+        newStatesAuto = [self.__FetchState(v) for v in self.autoVehicles]
+        
+        observation = np.array([ [s.speed, s.leaderSpeed, s.FollowerSpeed, s.distanceToLeader, s.distanceToFollower] for s in newStatesAuto ])
+        np.reshape(observation,-1)
+        
+        reward = 0
+        for s in newStatesAuto:
+            if  s.distanceToLeader   < __AccidentDistance \
+             or s.distanceToFollower < __AccidentDistance:
+                 reward -= self.accidentPunishment
+                 terminated = done = True
+        
+        reward += sum(newStates, key=lambda x: x.speed) / len(newStates)
+                
+        return observation, reward, terminated, truncated, info, done
     
     def reset(self):
-        pass
+        traci.close()
+        
+        sumoBin = 'C:/Program Files (x86)/Eclipse/Sumo/bin/sumo-gui' # May change
+        if self.renderMode == 'none': 
+            sumoBin = 'C:/Program Files (x86)/Eclipse/Sumo/bin/sumo' # May change
+        
+        traci.start([sumoBin, '--step-length='+str(self.timeStep),"-c",os.path.join(self.outputDir('/Ring.sumocfg'))])
+        
+        edgeCount = 4
+        edgeLength = self.radius * 2 * np.pi / edgeCount
+        carsPerEdge = self.numVehicles / edgeCount
+        separation = edgeLength / carsPerEdge
+        self.vehicles = []
+        self.autoVehicles = []
+        
+        assert separation > 10
+        
+        for i in range(edgeCount):
+            traci.route.add('r'+str(i),['e'+str(i),'e'+str((i+1)%edgeCount)])
+        
+        for j in range(self.numVehicles):
+            for i in range(np.ceil(carsPerEdge)):
+                    v = veh.Vehicle(veh.IDMController(**__IDMControllerParams), None, self.saveSpeeds)
+                    self.vehicles.append(v)
+                    traci.vehicle.add(v.id, 'r'+str(j), departPos=i*separation)
+                    traci.vehicle.setSpeedMode(v.id, 0)
+                    
+        for v in self.vehicles[::int(1/self.selfDrivingPercentage)]:
+            v.controller = veh.ObedientController()
+            self.autoVehicles.append(v)
+        
     
     def close(self):
-        pass
+        traci.close()
     
     def __FetchState(vehicle):
         edgeID = traci.vehicle.getRoadID(vehicle.id)
-        leaderID, distance = traci.vehicle.getLeader(vehicle.id)
         speed = traci.vehicle.getSpeed(vehicle.id)
-        leaderSpeed = traci.vehicle.getSpeed(vehicle.id) #leader
         position = traci.vehicle.getLanePosition(vehicle.id)
         
-        if 
+        leader = traci.vehicle.getLeader(vehicle.id)
+        leaderID, distanceLeader,leaderSpeed = '', float('-inf'), float('-inf')
+        if leader:
+            leaderID, distanceLeader = leader[0] , max(0,leader[1])
+            leaderSpeed = traci.vehicle.getSpeed(leaderID)
+            
+        follower = traci.vehicle.getFollower(vehicle.id)
+        followerID, distanceFollower,followerSpeed = '', float('-inf'), float('-inf')
+        if follower:
+            followerID, distanceFollower = leader[0] , max(0,leader[1])
+            followerSpeed = traci.vehicle.getSpeed(leaderID)
+            
+        return __VehicleState(edgeID=edgeID,
+                              position=position,
+                              speed=speed,
+                              leaderID=leaderID,
+                              leaderSpeed=leaderSpeed,
+                              distanceToLeader=distanceLeader,
+                              followerID=followerID,
+                              followerSpeed=followerSpeed,
+                              distanceToFollower=distanceFollower)
