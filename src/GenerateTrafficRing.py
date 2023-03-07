@@ -11,8 +11,7 @@ def createRingFiles(Radius, NodeNumber ,EdgeResolution, outputDir):
     nodes = minidom.Document()
     root = nodes.createElement('nodes')
     nodes.appendChild(root)
-
-
+    
     en = complex(math.cos(2*math.pi/NodeNumber),math.sin(2*math.pi/NodeNumber))
     pos = Radius
     for i in range(NodeNumber):

@@ -10,7 +10,7 @@ class Router:
     def getNextGoal(self, state):
         return 0
 
-__MaxImperfectionBreakTime = 2
+_MaxImperfectionBreakTime = 2
 
 class IDMController(Controller):
 
@@ -26,7 +26,7 @@ class IDMController(Controller):
     def calcAcceleration(self, dt, speed, leaderSpeed, distance):
         r = random.random()
         if r < self.imperfection:
-            self.EmergencyBreak(random.uniform(__MaxImperfectionBreakTime/2,__MaxImperfectionBreakTime))
+            self.EmergencyBreak(random.uniform(_MaxImperfectionBreakTime/2,_MaxImperfectionBreakTime))
         if self.breakTime > 0:
             self.breakTime -= dt
             return -self.b0
@@ -79,3 +79,6 @@ class Vehicle:
         if self.saveSpeed:
             self.speedHistory.append(v)
         return v
+    
+def ResetIDCounter():
+    VID = 0

@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<additionals>
+	<rerouter id="rr0" edges="e0">
+		<interval end="1e9">
+			<destProbReroute id="e1"/>
+		</interval>
+	</rerouter>
+	<rerouter id="rr1" edges="e1">
+		<interval end="1e9">
+			<destProbReroute id="e2"/>
+		</interval>
+	</rerouter>
+	<rerouter id="rr2" edges="e2">
+		<interval end="1e9">
+			<destProbReroute id="e3"/>
+		</interval>
+	</rerouter>
+	<rerouter id="rr3" edges="e3">
+		<interval end="1e9">
+			<destProbReroute id="e0"/>
+		</interval>
+	</rerouter>
+</additionals>
