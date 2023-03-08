@@ -7,7 +7,7 @@ running = True
 
 env = RingEnvironment.RingEnv(
                 radius = 25,
-                numVehicles = 15,
+                numVehicles = 10,
                 selfDrivingPercentage = 1/20,
                 timeStep = 0.5,
                 saveSpeeds = False,
@@ -24,8 +24,10 @@ while running:
         a += 1
     if keyboard.is_pressed('k'):
         a -= 1
-    
-    print(env.step(np.array([a])))
+    obs, rew, terminated, truncated,info, done = env.step(np.array([a]))
+    if terminated:
+        env.reset()
+        pass
     
     time.sleep(0.5)
      

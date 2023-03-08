@@ -19,13 +19,12 @@ tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
 sys.path.append(tools)
 
 MaxSpeed = 34
-AccidentDistance = 1
 IDMControllerParams = {
     'a' :               5.0,
     'b' :               5.0,
     'T' :               2.0,
     'v' :               20.0,
-    's' :               40.0,
+    's' :               3.0,
     'imperfection' :    1/500
 }
 
@@ -69,6 +68,7 @@ class RingEnv(gym.Env):
         self.saveSpeeds = saveSpeeds
         self.selfDrivingPercentage = selfDrivingPercentage
         self.timeStep = timeStep
+        self.edgeCount = 4
         self.metadata['render_modes'] = {'human','none'}
         self.action_space = gym.spaces.MultiDiscrete([3]*self.selfDrivingNum)
         self.observation_space = gym.spaces.Box(
@@ -84,15 +84,16 @@ class RingEnv(gym.Env):
         
         traci.start([sumoBin, '--step-length='+str(timeStep),"-c", 'C:/Users/Tribik/Documents/Mohamed/Études/MP/TIPE/Code/Ring/SumoFiles/ring.sumocfg'])
         
+        for i in range(self.edgeCount):
+            traci.route.add('r'+str(i),['e'+str(i),'e'+str((i+1)%self.edgeCount)])
+        
         self.__PopulateRode()
         traci.simulationStep()
         
     def render(self):
         pass
     
-    def step(self, action):
-        global AccidentDistance
-        
+    def step(self, action):        
         accelerationsAuto = [(a - 1)*self.selfDrivingAccel for a in action]
         states = [self.__FetchState(v) for v in self.vehicles] 
         
@@ -104,7 +105,7 @@ class RingEnv(gym.Env):
         
         for vh,s,a in zip(self.vehicles, states,accelerations):
             v = s.speed + a*self.timeStep
-            traci.vehicle.setSpeed(vh.id, v)
+            traci.vehicle.setSpeed(vh.id, max(v,0))
         
         traci.simulationStep()
         
@@ -113,18 +114,20 @@ class RingEnv(gym.Env):
         info = {}
         done = False
         
+        reward = 0
+        
+        collisions = traci.simulation.getCollisions()
+        print(collisions)
+        if  collisions:
+            reward += self.accidentPunishment
+            terminated = done = True
+            return [], reward, terminated, truncated, info, done
+        
         newStates = [self.__FetchState(v) for v in self.vehicles]
         newStatesAuto = [self.__FetchState(v) for v in self.autoVehicles]
         
         observation = np.array([ [s.speed, s.leaderSpeed, s.followerSpeed, s.distanceToLeader, s.distanceToFollower] for s in newStatesAuto ])
         np.reshape(observation,-1)
-        
-        reward = 0
-        for s in newStatesAuto:
-            if  s.distanceToLeader   < AccidentDistance \
-             or s.distanceToFollower < AccidentDistance:
-                 reward -= self.accidentPunishment
-                 terminated = done = True
         
         reward += np.mean(np.abs(accelerations))
                 
@@ -133,7 +136,8 @@ class RingEnv(gym.Env):
     def reset(self):
         for v in self.vehicles:
             traci.vehicle.remove(v.id)
-
+        traci.simulationStep()
+        veh.ResetIDCounter()
         self.__PopulateRode()
         traci.simulationStep()
     
@@ -170,19 +174,16 @@ class RingEnv(gym.Env):
     def __PopulateRode(self):
         global IDMControllerParams
         
-        edgeCount = 4
-        edgeLength = self.radius * 2 * np.pi / edgeCount
-        carsPerEdge = self.numVehicles / edgeCount
+        self.edgeCount = 4
+        edgeLength = self.radius * 2 * np.pi / self.edgeCount
+        carsPerEdge = self.numVehicles / self.edgeCount
         separation = edgeLength / carsPerEdge
         self.vehicles = []
         self.autoVehicles = []
         
         assert separation > 5
         
-        for i in range(edgeCount):
-            traci.route.add('r'+str(i),['e'+str(i),'e'+str((i+1)%edgeCount)])
-        
-        for j in range(edgeCount):
+        for j in range(self.edgeCount):
             for i in range(round(carsPerEdge)):
                     v = veh.Vehicle(veh.IDMController(**IDMControllerParams), None, self.saveSpeeds)
                     self.vehicles.append(v)
@@ -192,3 +193,6 @@ class RingEnv(gym.Env):
         for v in self.vehicles[::int(1/self.selfDrivingPercentage)]:
             v.controller = veh.ObedientController()
             self.autoVehicles.append(v)
+            traci.vehicle.setColor(v.id, (20,40,230))
+            
+        traci.vehicle.setColor(self.vehicles[-1].id, (230,40,30))
