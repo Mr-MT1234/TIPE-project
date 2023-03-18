@@ -51,7 +51,7 @@ class DQN(nn.Module):
             nn.ReLU(),
             nn.Linear(16,16),
             nn.ReLU(),
-            nn.Linear(16,numAct)
+            nn.Linear(16 ,numAct)
         )
             
     def forward(self, x):
@@ -173,8 +173,8 @@ def optimize_model():
     torch.nn.utils.clip_grad_value_(policy_net.parameters(), 100)
     optimizer.step()
     
-num_episodes = 1500
-num_models = 10
+num_episodes = 3000
+num_models = 20
 
 with open(os.path.join(os.getcwd(),'models/log.txt'), 'w') as sys.stdout:
     for i_model in range(num_models):
@@ -191,10 +191,9 @@ with open(os.path.join(os.getcwd(),'models/log.txt'), 'w') as sys.stdout:
                 action = select_action(state)
                 observation, reward, terminated, truncated, info, done = env.step(np.array(action))
                 cummilativeReward += reward
-                rewards[i_episode] = reward
                 reward = torch.tensor([reward], device=device)
+                rewards[i_episode] = cummilativeReward
                 done = terminated or truncated
-
                 
                 if terminated:
                     next_state = None
@@ -231,6 +230,8 @@ with open(os.path.join(os.getcwd(),'models/log.txt'), 'w') as sys.stdout:
 
         print(f'Model {i_model} trained | elapsed time : {time.strftime("%H:%M:%S"),elapsed_time }')
         torch.save(policy_net, os.path.join(outputDir,'model.pt'))
+        
+
         
         plt.clf()
         plt.plot(rewards)
