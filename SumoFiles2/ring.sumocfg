@@ -1,9 +1,0 @@
-<?xml version="1.0" ?>
-<configuration>
-	<input>
-		<net-file value="ring.net.xml"/>
-	</input>
-	<additionals>
-		<additional-files value="ring.rerou.xml"/>
-	</additionals>
-</configuration>

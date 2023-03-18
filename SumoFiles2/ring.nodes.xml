@@ -1,7 +1,0 @@
-<?xml version="1.0" ?>
-<nodes>
-	<node id="n0" x="25" y="0" type="priority"/>
-	<node id="n1" x="1.5307579422779716e-15" y="25.0" type="priority"/>
-	<node id="n2" x="-25.0" y="3.061515884555943e-15" type="priority"/>
-	<node id="n3" x="-4.592273826833915e-15" y="-25.0" type="priority"/>
-</nodes>

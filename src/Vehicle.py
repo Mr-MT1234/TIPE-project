@@ -31,7 +31,7 @@ class IDMController(Controller):
             self.breakTime -= dt
             return -self.b0
         
-        if distance < 0:
+        if distance <= 0:
             return self.a0*(1-speed/self.v0)
         v =  speed
         dv = v - leaderSpeed
@@ -81,4 +81,5 @@ class Vehicle:
         return v
     
 def ResetIDCounter():
+    global VID
     VID = 0
