@@ -1,0 +1,75 @@
+import torch as tr
+import torch.nn as trn
+import torch.nn.functional as trf
+
+class CriticNetwork(trn.Module):
+    def __init__(self, device, stateDim, actionDim, l1, l2,savePath):
+        super(CriticNetwork, self).__init__()
+        self.stateDim = stateDim
+        self.actionDim = actionDim
+        self.savePath = savePath
+        
+        self.layer1 = trn.Linear(stateDim + actionDim, l1, device=device)
+        self.layer2 = trn.Linear(l1, l2, device=device)
+        self.output = trn.Linear(l2,1, device=device)
+        
+        
+    def forward(self, state, action):
+        x = tr.cat((state,action), dim=1)
+        x = self.layer1(x)
+        x = trf.relu(x)
+        x = self.layer2(x)
+        x = trf.relu(x)
+        x = self.output(x)
+        return x
+    
+    def softClone(self, other, tau):
+        otherState = other.state_dict()
+        selfState = self.state_dict()
+        newState = { key : otherState[key]*tau + selfState[key]*(1-tau) for key in selfState}
+        self.load_state_dict(newState)
+    
+    def save(self):
+        tr.save(self.state_dict(), self.savePath)
+        
+    def load(self):
+        stateDict = tr.load(self.savePath)
+        self.load_state_dict(stateDict)
+        
+        
+class ActorNetwork(trn.Module):
+    def __init__(self, device, stateDim, actionDim, l1, l2, bounds, savePath):
+        super(ActorNetwork, self).__init__()
+        self.stateDim = stateDim
+        self.actionDim = actionDim
+        self.bounds = tr.tensor(bounds, device=device)
+        self.saveFile = savePath
+        
+        self.layer1 = trn.Linear(stateDim, l1, device=device)
+        self.layer2 = trn.Linear(l1, l2, device=device)
+        self.output = trn.Linear(l2, actionDim, device=device)
+        
+    def forward(self, state):
+        x = self.layer1(state)
+        x = trf.relu(x)
+        x = self.layer2(x)
+        x = trf.relu(x)
+        x = self.output(x)
+        x = trf.tanh(x)
+        
+        x = ((x + 1) / 2) * (self.bounds[1] -  self.bounds[0]) + self.bounds[0]
+        
+        return x
+    
+    def softClone(self, other, tau):
+        otherState = other.state_dict()
+        selfState = self.state_dict()
+        newState = { key : otherState[key]*tau + selfState[key]*(1-tau) for key in selfState}
+        self.load_state_dict(newState)
+    
+    def save(self):
+        tr.save(self.state_dict(), self.savePath)
+        
+    def load(self):
+        stateDict = tr.load(self.savePath)
+        self.load_state_dict(stateDict)
