@@ -8,91 +8,128 @@ import threading
 import os, sys
 import time
 
-#env = gym.make('Pendulum-v1')
+#env = gym.make('Pendulum-v1', render_mode='human')
 env = gym.make('LunarLanderContinuous-v2')
 device = tr.device('cpu')
 
-bounds = (env.action_space.low[0],env.action_space.high[0]) 
+bounds = (env.action_space.low,env.action_space.high) 
+agentPath = os.path.join(os.getcwd(), f'agents/agent-{time.time()}')
+if not os.path.exists(agentPath):
+    os.makedirs(agentPath)
 
-agent = Agent (
-              device=device,
-              stateDim=env.observation_space.shape[0],
-              actionDim=env.action_space.shape[0],
-              discount=0.99,
-              memoryCap=1000000,
-              batchSize=64,
-              noise=0.1,
-              tau=0.005,
-              lrActor=0.001,
-              lrCritic=0.002,
-              layersActor=[512,512],
-              layersCritic=[512,512],
-              outBounds= bounds,
-              savePath=''
-              )
+agent = Agent(
+                device=device,
+                stateDim=env.observation_space.shape[0],
+                actionDim=env.action_space.shape[0],
+                discount=0.99,
+                memoryCap=1000000,
+                batchSize=64,
+                noise=0.1,
+                tau=0.005,
+                lrActor=2e-4,
+                lrCritic=3e-4,
+                layersActor=[256,256],
+                layersCritic=[256,256],
+                outBounds= bounds,
+                learningDecay=0.995,
+                noiseDecay=0.995,
+                savePath=agentPath
+            )
 
-EPISODES = 1000
+EPISODES = 2000
+INTERACTIVE_MODE = False
 rewards = []
 avg = []
-running = True
-plt.ion()
 
-def train():
-    global EPISODES, rewards
+if INTERACTIVE_MODE:
+    plt.ion()
     
-    log = open(os.path.join(os.getcwd(), 'log.txt'),'w')
+# Warm up
+WARM_UP_STEPS = 10000
+i = 0
+while i < WARM_UP_STEPS:
+    env1 = gym.make('LunarLanderContinuous-v2')
+    state, info = env1.reset()
+    done = False
+    while not done and i < WARM_UP_STEPS:
+        action = np.array([np.random.uniform(-1,1),np.random.uniform(-1,1)])
+        newState, reward, terminated, truncated, info = env1.step(action)
+        done = terminated or truncated
+        agent.remember(state,action,newState,reward, done)
+        state = newState
+        i += 1
+    state, info = env1.reset()
+
+
+log = open(os.path.join(agentPath, 'log.txt'),'w')
+def train():
+    global EPISODES, rewards,log
+    
+    bestAvg = float('-inf')
     for episode in range(EPISODES):
         begin = time.time()
-        if not running:
-            break
+
         totalReward = 0
         obs, info = env.reset()
         obs = tr.tensor(obs)
-        Done = False
+        done = False
         
-        while not Done and running:
-            action = agent.act(obs,True).numpy()
+        last = begin
+        while not done:
+            action = agent.act(obs,True)
             newObs, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
             agent.remember(obs,action,newObs,reward,done)
             
-            agent.learn()
+            aLoss, cLoss = agent.learn()
             
-            obs = tr.tensor(newObs)
-            Done = done
+            obs = newObs
             totalReward += reward
-            plt.pause(0.001)
+            now = time.time()
+            if INTERACTIVE_MODE and (now - last) > 1/30:
+                plt.pause(0.001)
+                last = now
 
+        rewards.append(totalReward)
         
         now = time.time()
         average = np.mean(rewards[max(-100,-len(rewards)):])
+        if average > bestAvg:
+            bestAvg = average
+            agent.save()
+            
+        agent.decay()
         
-        print(f'episode:{episode} \t| reward:{totalReward} \t|took:{now-begin}s \t| avrege:{average}')
-        print(f'episode:{episode} \t| reward:{totalReward} \t|took:{now-begin}s \t| avrege:{average}',file=log)
+        print(f'episode:{episode} \t| reward:{totalReward} \t| took:{now-begin}s \t| avrege:{average} \t| loss:(actor:{aLoss},critic:{cLoss})')
+        print(f'episode:{episode} \t| reward:{totalReward} \t| took:{now-begin}s \t| avrege:{average} \t| loss:(actor:{aLoss},critic:{cLoss})',file=log)
         
-        rewards.append(totalReward)
         avg.append(average)
         
-        plt.clf()
-        plt.plot(rewards)
-        plt.plot(avg)
-    log.close()
+        if INTERACTIVE_MODE:
+            plt.clf()
+            plt.plot(rewards)
+            plt.plot(avg)
 
 print('------------------------------- Training -------------------------------')
-        
 
-train()
+try:
+    train()
+except Exception as e:
+    if not isinstance(KeyboardInterrupt,e):
+        print(f'Error: {e}')
+    pass
+finally:
+    print('-------------------------------saving plot------------------ -------------')
 
-print('-------------------------------saving plot------------------ -------------')
+    plt.plot(rewards, color='lightblue', label='Reward')
+    plt.plot(avg, color=(85/255,3/255,250/255), label='Average')
 
-plt.plot(rewards)
-plt.plot(avg)
+    plt.title('Evolution of trainning')
+    plt.xlabel('Episode')
+    plt.ylabel('Reward')
+    plt.legend()
 
-savePath = os.path.join(os.getcwd(),'plots')
-if not os.path.exists(savePath):
-    os.makedirs(savePath)
-
-plt.savefig(savePath)
-
-print('-------------------------------    Done    -------------------------------')
+    plt.savefig(os.path.join(agentPath, 'evolution.pdf'), dpi=150)
+    log.close()
+    print('-------------------------------    Done    -------------------------------')
 
