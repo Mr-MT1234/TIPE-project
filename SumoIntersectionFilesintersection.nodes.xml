@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<nodes>
+	<node id="nCenter" x="0" y="0" type="priority"/>
+	<node id="nRight" x="200" y="0" type="priority"/>
+	<node id="nLeft" x="-200" y="0" type="priority"/>
+	<node id="nPost" x="0" y="300" type="priority"/>
+	<node id="nLeftEnt" x="-300" y="0" type="priority"/>
+	<node id="nRightEnt" x="300" y="0" type="priority"/>
+	<node id="nPostExt" x="0" y="400" type="priority"/>
+</nodes>

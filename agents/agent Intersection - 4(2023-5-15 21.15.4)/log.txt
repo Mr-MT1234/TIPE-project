@@ -1,0 +1,2 @@
+episode:0 	| reward:-1577.10 	| took:136.58s 	| avrege:-1577.10)
+episode:1 	| reward:897.00 	| took:154.23s 	| avrege:-340.05)

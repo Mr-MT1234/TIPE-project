@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2023-05-13 13:13:47 by Eclipse SUMO netconvert Version 1.13.0
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
+
+    <input>
+        <node-files value="C:\Users\Tribik\Documents\Mohamed\Etudes\MP\TIPE\Code\Ring/SumoIntersectionFilesintersection.nodes.xml"/>
+        <edge-files value="C:\Users\Tribik\Documents\Mohamed\Etudes\MP\TIPE\Code\Ring/SumoIntersectionFilesintersection.edges.xml"/>
+    </input>
+
+    <output>
+        <output-file value="C:\Users\Tribik\Documents\Mohamed\Etudes\MP\TIPE\Code\Ring/SumoIntersectionFilesintersection.net.xml"/>
+    </output>
+
+    <report>
+        <aggregate-warnings value="5"/>
+    </report>
+
+</configuration>
+-->
+
+<net version="1.9" junctionCornerDetail="5" limitTurnSpeed="5.50" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
+
+    <location netOffset="300.00,0.00" convBoundary="0.00,0.00,600.00,400.00" origBoundary="-300.00,0.00,300.00,400.00" projParameter="!"/>
+
+    <edge id=":nCenter_0" function="internal">
+        <lane id=":nCenter_0_0" index="0" speed="6.51" length="9.03" shape="307.20,1.60 304.75,1.95 303.00,3.00 301.95,4.75 301.60,7.20"/>
+    </edge>
+    <edge id=":nCenter_1" function="internal">
+        <lane id=":nCenter_1_0" index="0" speed="7.33" length="7.46" shape="296.00,-1.60 298.45,-1.05 300.20,0.60 301.11,2.98"/>
+    </edge>
+    <edge id=":nCenter_2" function="internal">
+        <lane id=":nCenter_2_0" index="0" speed="7.33" length="4.26" shape="301.11,2.98 301.25,3.35 301.60,7.20"/>
+    </edge>
+    <edge id=":nLeft_0" function="internal">
+        <lane id=":nLeft_0_0" index="0" speed="6.51" length="4.11" shape="98.40,4.00 98.75,1.55 99.59,0.15"/>
+    </edge>
+    <edge id=":nLeft_2" function="internal">
+        <lane id=":nLeft_2_0" index="0" speed="6.51" length="4.93" shape="99.59,0.15 99.80,-0.20 101.55,-1.25 104.00,-1.60"/>
+    </edge>
+    <edge id=":nLeft_1" function="internal">
+        <lane id=":nLeft_1_0" index="0" speed="30.00" length="11.20" shape="92.80,-1.60 104.00,-1.60"/>
+    </edge>
+    <edge id=":nPost_0" function="internal">
+        <lane id=":nPost_0_0" index="0" speed="6.51" length="9.03" shape="301.60,292.80 301.95,295.25 303.00,297.00 304.75,298.05 307.20,298.40"/>
+    </edge>
+    <edge id=":nPost_1" function="internal">
+        <lane id=":nPost_1_0" index="0" speed="30.00" length="14.40" shape="301.60,292.80 301.60,307.20"/>
+    </edge>
+    <edge id=":nPost_2" function="internal">
+        <lane id=":nPost_2_0" index="0" speed="7.33" length="11.73" shape="301.60,292.80 301.25,296.65 300.20,299.40 298.45,301.05 296.00,301.60"/>
+    </edge>
+    <edge id=":nRight_0" function="internal">
+        <lane id=":nRight_0_0" index="0" speed="6.51" length="9.03" shape="498.40,7.20 498.05,4.75 497.00,3.00 495.25,1.95 492.80,1.60"/>
+    </edge>
+    <edge id=":nRight_1" function="internal">
+        <lane id=":nRight_1_0" index="0" speed="30.00" length="11.20" shape="504.00,1.60 492.80,1.60"/>
+    </edge>
+
+    <edge id="eCP" from="nCenter" to="nPost" priority="1">
+        <lane id="eCP_0" index="0" speed="30.00" length="285.60" shape="301.60,7.20 301.60,292.80"/>
+    </edge>
+    <edge id="eLC" from="nLeft" to="nCenter" priority="1">
+        <lane id="eLC_0" index="0" speed="30.00" length="192.00" shape="104.00,-1.60 296.00,-1.60"/>
+    </edge>
+    <edge id="eLL" from="nLeftEnt" to="nLeft" priority="1">
+        <lane id="eLL_0" index="0" speed="30.00" length="92.80" shape="0.00,-1.60 92.80,-1.60"/>
+    </edge>
+    <edge id="ePL" from="nPost" to="nLeft" priority="1" shape="300.00,300.00 100.00,300.00 100.00,0.00">
+        <lane id="ePL_0" index="0" speed="30.00" length="495.20" shape="296.00,301.60 98.40,301.60 98.40,4.00"/>
+    </edge>
+    <edge id="ePP" from="nPost" to="nPostExt" priority="1">
+        <lane id="ePP_0" index="0" speed="30.00" length="92.80" shape="301.60,307.20 301.60,400.00"/>
+    </edge>
+    <edge id="ePR" from="nPost" to="nRight" priority="1" shape="300.00,300.00 500.00,300.00 500.00,0.00">
+        <lane id="ePR_0" index="0" speed="30.00" length="482.40" shape="307.20,298.40 498.40,298.40 498.40,7.20"/>
+    </edge>
+    <edge id="eRC" from="nRight" to="nCenter" priority="1">
+        <lane id="eRC_0" index="0" speed="30.00" length="185.60" shape="492.80,1.60 307.20,1.60"/>
+    </edge>
+    <edge id="eRR" from="nRightEnt" to="nRight" priority="1">
+        <lane id="eRR_0" index="0" speed="30.00" length="96.00" shape="600.00,1.60 504.00,1.60"/>
+    </edge>
+
+    <junction id="nCenter" type="priority" x="300.00" y="0.00" incLanes="eRC_0 eLC_0" intLanes=":nCenter_0_0 :nCenter_2_0" shape="300.00,7.20 303.20,7.20 303.64,4.98 304.20,4.20 304.98,3.64 305.98,3.31 307.20,3.20 307.20,0.00 304.75,-0.24 303.00,-0.83 300.20,-2.37 298.45,-2.96 296.00,-3.20 296.00,0.00 298.22,0.80 299.00,1.80 299.56,3.20 299.89,5.00">
+        <request index="0" response="00" foes="10" cont="0"/>
+        <request index="1" response="01" foes="01" cont="1"/>
+    </junction>
+    <junction id="nLeft" type="priority" x="100.00" y="0.00" incLanes="ePL_0 eLL_0" intLanes=":nLeft_2_0 :nLeft_1_0" shape="96.80,4.00 100.00,4.00 100.44,1.78 101.00,1.00 101.78,0.44 102.78,0.11 104.00,0.00 104.00,-3.20 92.80,-3.20 92.80,0.00 95.02,0.44 95.80,1.00 96.36,1.78 96.69,2.78">
+        <request index="0" response="10" foes="10" cont="1"/>
+        <request index="1" response="00" foes="01" cont="0"/>
+    </junction>
+    <junction id="nLeftEnt" type="dead_end" x="0.00" y="0.00" incLanes="" intLanes="" shape="0.00,0.00 0.00,-3.20"/>
+    <junction id="nPost" type="priority" x="300.00" y="300.00" incLanes="eCP_0" intLanes=":nPost_0_0 :nPost_1_0 :nPost_2_0" shape="300.00,307.20 303.20,307.20 303.31,305.00 303.64,303.20 304.20,301.80 304.98,300.80 305.98,300.20 307.20,300.00 307.20,296.80 304.98,296.36 304.20,295.80 303.64,295.02 303.31,294.02 303.20,292.80 300.00,292.80 299.89,295.00 299.56,296.80 299.00,298.20 298.22,299.20 297.22,299.80 296.00,300.00 296.00,303.20 298.22,303.64 299.00,304.20 299.56,304.98 299.89,305.98">
+        <request index="0" response="000" foes="000" cont="0"/>
+        <request index="1" response="000" foes="000" cont="0"/>
+        <request index="2" response="000" foes="000" cont="0"/>
+    </junction>
+    <junction id="nPostExt" type="dead_end" x="300.00" y="400.00" incLanes="ePP_0" intLanes="" shape="303.20,400.00 300.00,400.00"/>
+    <junction id="nRight" type="priority" x="500.00" y="0.00" incLanes="ePR_0 eRR_0" intLanes=":nRight_0_0 :nRight_1_0" shape="496.80,7.20 500.00,7.20 500.44,4.98 501.00,4.20 501.78,3.64 502.78,3.31 504.00,3.20 504.00,0.00 492.80,0.00 492.80,3.20 495.02,3.64 495.80,4.20 496.36,4.98 496.69,5.98">
+        <request index="0" response="00" foes="10" cont="0"/>
+        <request index="1" response="01" foes="01" cont="0"/>
+    </junction>
+    <junction id="nRightEnt" type="dead_end" x="600.00" y="0.00" incLanes="" intLanes="" shape="600.00,0.00 600.00,3.20"/>
+
+    <junction id=":nCenter_2_0" type="internal" x="301.11" y="2.98" incLanes=":nCenter_1_0 eRC_0" intLanes=":nCenter_0_0"/>
+    <junction id=":nLeft_2_0" type="internal" x="99.59" y="0.15" incLanes=":nLeft_0_0 eLL_0" intLanes=":nLeft_1_0"/>
+
+    <connection from="eCP" to="ePR" fromLane="0" toLane="0" via=":nPost_0_0" dir="r" state="M"/>
+    <connection from="eCP" to="ePP" fromLane="0" toLane="0" via=":nPost_1_0" dir="s" state="M"/>
+    <connection from="eCP" to="ePL" fromLane="0" toLane="0" via=":nPost_2_0" dir="l" state="M"/>
+    <connection from="eLC" to="eCP" fromLane="0" toLane="0" via=":nCenter_1_0" dir="l" state="m"/>
+    <connection from="eLL" to="eLC" fromLane="0" toLane="0" via=":nLeft_1_0" dir="s" state="M"/>
+    <connection from="ePL" to="eLC" fromLane="0" toLane="0" via=":nLeft_0_0" dir="l" state="m"/>
+    <connection from="ePR" to="eRC" fromLane="0" toLane="0" via=":nRight_0_0" dir="r" state="M"/>
+    <connection from="eRC" to="eCP" fromLane="0" toLane="0" via=":nCenter_0_0" dir="r" state="M"/>
+    <connection from="eRR" to="eRC" fromLane="0" toLane="0" via=":nRight_1_0" dir="s" state="m"/>
+
+    <connection from=":nCenter_0" to="eCP" fromLane="0" toLane="0" dir="r" state="M"/>
+    <connection from=":nCenter_1" to="eCP" fromLane="0" toLane="0" via=":nCenter_2_0" dir="l" state="m"/>
+    <connection from=":nCenter_2" to="eCP" fromLane="0" toLane="0" dir="l" state="M"/>
+    <connection from=":nLeft_0" to="eLC" fromLane="0" toLane="0" via=":nLeft_2_0" dir="l" state="m"/>
+    <connection from=":nLeft_2" to="eLC" fromLane="0" toLane="0" dir="l" state="M"/>
+    <connection from=":nLeft_1" to="eLC" fromLane="0" toLane="0" dir="s" state="M"/>
+    <connection from=":nPost_0" to="ePR" fromLane="0" toLane="0" dir="r" state="M"/>
+    <connection from=":nPost_1" to="ePP" fromLane="0" toLane="0" dir="s" state="M"/>
+    <connection from=":nPost_2" to="ePL" fromLane="0" toLane="0" dir="l" state="M"/>
+    <connection from=":nRight_0" to="eRC" fromLane="0" toLane="0" dir="r" state="M"/>
+    <connection from=":nRight_1" to="eRC" fromLane="0" toLane="0" dir="s" state="M"/>
+
+</net>

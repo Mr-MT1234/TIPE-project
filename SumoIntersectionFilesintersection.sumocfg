@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<configuration>
+	<input>
+		<net-file value="intersection.net.xml"/>
+	</input>
+	<additionals>
+		<additional-files value="intersection.rerou.xml"/>
+	</additionals>
+</configuration>

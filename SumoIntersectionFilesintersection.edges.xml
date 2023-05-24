@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<edges>
+	<edge id="eLL" from="nLeftEnt" to="nLeft" priority="1" speed="30.0"/>
+	<edge id="eLC" from="nLeft" to="nCenter" priority="1" speed="30.0"/>
+	<edge id="eRR" from="nRightEnt" to="nRight" priority="1" speed="30.0"/>
+	<edge id="eRC" from="nRight" to="nCenter" priority="1" speed="30.0"/>
+	<edge id="eCP" from="nCenter" to="nPost" priority="1" speed="30.0"/>
+	<edge id="ePP" from="nPost" to="nPostExt" priority="1" speed="30.0"/>
+	<edge id="ePL" from="nPost" to="nLeft" priority="1" speed="30.0" shape="0,300 -200,300 -200,0"/>
+	<edge id="ePR" from="nPost" to="nRight" priority="1" speed="30.0" shape="0,300 200,300 200,0"/>
+</edges>

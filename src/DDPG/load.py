@@ -12,12 +12,12 @@ import time
 env = gym.make('LunarLanderContinuous-v2',render_mode='human')
 device = tr.device('cpu')
 
-agentPath = 'C:/Users/Tribik/Documents/Mohamed/Etudes/MP/TIPE/Code/Ring/src/agents/bestsofar'
+agentPath = 'C:/Users/Tribik/Documents/Mohamed/Etudes/MP/TIPE/Code/Ring/agents/agent Lunar Landar Continuous (Best)'
 bounds = (env.action_space.low,env.action_space.high) 
 
 agent = Agent(
                 device=device,
-                stateDim=env.observation_space.shape[0],
+                stateShape=env.observation_space.shape,
                 actionDim=env.action_space.shape[0],
                 discount=0.99,
                 memoryCap=1000000,
@@ -26,15 +26,15 @@ agent = Agent(
                 tau=0.005,
                 lrActor=2e-4,
                 lrCritic=3e-4,
-                layersActor=[256,256],
-                layersCritic=[256,256],
+                layersActor=[512,512],
+                layersCritic=[512,512],
                 outBounds= bounds,
                 learningDecay=0.995,
                 noiseDecay=0.995,
                 savePath=agentPath
             )
 
-agent.load()
+agent.load(agentPath)
 
 for episode in range(10000):
     begin = time.time()

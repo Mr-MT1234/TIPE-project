@@ -1,6 +1,7 @@
-src/__pycache__
-*.py[cod]
+__pycache__/
 /Lib
 /models
 src/agents
-/SumoFiles
+SumoFiles/
+SumoIntersectionFiles/
+agents/Failed attemps/

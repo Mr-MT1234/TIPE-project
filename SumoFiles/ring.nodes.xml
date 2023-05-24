@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <nodes>
-	<node id="n0" x="120" y="0" type="priority"/>
-	<node id="n1" x="7.34788079488412e-15" y="120.0" type="priority"/>
-	<node id="n2" x="-120.0" y="1.469576158976824e-14" type="priority"/>
-	<node id="n3" x="-2.2043642384652358e-14" y="-120.0" type="priority"/>
+	<node id="n0" x="50" y="0" type="priority"/>
+	<node id="n1" x="3.061616997868383e-15" y="50.0" type="priority"/>
+	<node id="n2" x="-50.0" y="6.123233995736766e-15" type="priority"/>
+	<node id="n3" x="-9.184850993605149e-15" y="-50.0" type="priority"/>
 </nodes>

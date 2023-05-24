@@ -6,10 +6,10 @@ import numpy as np
 class CriticNetwork(trn.Module):
     def __init__(self, device, stateDim, actionDim, l1, l2,savePath):
         super(CriticNetwork, self).__init__()
-        self.stateDim = stateDim
+        self.stateDim = stateDim[0]
         self.actionDim = actionDim
         self.savePath = savePath
-        self.layer1 = trn.Linear(stateDim, l1, device=device)
+        self.layer1 = trn.Linear(self.stateDim, l1, device=device)
         self.layer21 = trn.Linear(l1, l2, device=device)
         self.layer22 = trn.Linear(actionDim, l2, device=device)
         self.output = trn.Linear(l2,1, device=device)
@@ -45,23 +45,30 @@ class CriticNetwork(trn.Module):
                 x.data.mul_(1-tau)
                 x.data.add_(tau * y.data)
     
-    def save(self):
+    def saveCheckPoint(self):
         tr.save(self.state_dict(), self.savePath)
         
-    def load(self):
+    def loadCheckPoint(self):
         stateDict = tr.load(self.savePath)
         self.load_state_dict(stateDict)
-
         
+    def save(self, path):
+        tr.save(self.state_dict(), path)
+    
+    def load(self,path):
+        stateDict = tr.load(path)
+        self.load_state_dict(stateDict)
+    
+
 class ActorNetwork(trn.Module):
     def __init__(self, device, stateDim, actionDim, l1, l2, bounds, savePath):
         super(ActorNetwork, self).__init__()
-        self.stateDim = stateDim
+        self.stateDim = stateDim[0]
         self.actionDim = actionDim
         self.bounds = tr.tensor(bounds, device=device)
         self.savePath = savePath
 
-        self.layer1 = trn.Linear(stateDim, l1, device=device)
+        self.layer1 = trn.Linear(self.stateDim, l1, device=device)
         self.layer2 = trn.Linear(l1, l2, device=device)
         self.output = trn.Linear(l2, actionDim, device=device)
         """
@@ -97,9 +104,128 @@ class ActorNetwork(trn.Module):
                 x.data.mul_(1-tau)
                 x.data.add_(tau * y.data)
     
-    def save(self):
+    def saveCheckPoint(self):
         tr.save(self.state_dict(), self.savePath)
         
-    def load(self):
+    def loadCheckPoint(self):
         stateDict = tr.load(self.savePath)
         self.load_state_dict(stateDict)
+        
+    def save(self, path):
+        tr.save(self.state_dict(), path)
+    
+    def load(self,path):
+        stateDict = tr.load(path)
+        self.load_state_dict(stateDict)
+    
+        
+class CriticConvNetwork(trn.Module):
+    def __init__(self, device, stateShape, actionDim,savePath):
+        super(CriticConvNetwork, self).__init__()
+        self.stateShape = stateShape
+        self.actionDim = actionDim
+        self.savePath = savePath
+
+        self.seqState = trn.Sequential(
+            trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(20,1)),
+            trn.ReLU(),
+            trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(3,1)),
+            trn.ReLU(),
+            trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(3,2)),
+            trn.MaxPool2d(kernel_size=(2,1), stride=(2,1)),
+            trn.ReLU(),
+            
+            trn.Flatten(-3,-1),
+            
+            trn.LazyLinear(out_features=100),
+            trn.ReLU(),
+            trn.Linear(in_features=100,out_features=100),
+        ).to(device)
+        
+        dummy = tr.tensor(np.empty(stateShape,dtype=np.float32))
+        self.seqState(dummy)
+        
+        self.linearAction = trn.Linear(in_features=actionDim,out_features=100, device=device)
+        self.output = trn.Linear(in_features=100,out_features=1, device=device)
+        
+    def forward(self, state, action):
+        x = self.seqState(state)
+        y = self.linearAction(action)
+        out = self.output(trf.relu(x+y))
+        return out
+            
+    def softClone(self, other, tau):
+        with tr.no_grad():
+            for x, y in zip(self.parameters(), other.parameters()):
+                x.data.mul_(1-tau)
+                x.data.add_(tau * y.data)
+    
+    def saveCheckPoint(self):
+        tr.save(self.state_dict(), self.savePath)
+        
+    def loadCheckPoint(self):
+        stateDict = tr.load(self.savePath)
+        self.load_state_dict(stateDict)
+        
+    def save(self, path):
+        tr.save(self.state_dict(), path)
+    
+    def load(self,path):
+        stateDict = tr.load(path)
+        self.load_state_dict(stateDict)
+    
+    
+class ActorConvNetwork(trn.Module):
+    def __init__(self, device, stateShape, actionDim, outBounds, savePath):
+        super(ActorConvNetwork, self).__init__()
+        self.stateShape = stateShape
+        self.actionDim = actionDim
+        self.outBounds = outBounds
+        self.savePath = savePath
+        
+        self.seq = trn.Sequential(
+            trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(20,1)),
+            trn.ReLU(),
+            trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(3,1)),
+            trn.ReLU(),
+            trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(3,2)),
+            trn.MaxPool2d(kernel_size=(2,1), stride=(2,1)),
+            trn.ReLU(),
+            
+            trn.Flatten(-3,-1),
+            
+            trn.LazyLinear(out_features=100),
+            trn.ReLU(),
+            trn.Linear(in_features=100, out_features=100),
+            trn.ReLU(),
+            trn.Linear(in_features=100,out_features=actionDim),
+            trn.Tanh(),
+        ).to(device)
+        
+        dummy = tr.tensor(np.empty(stateShape,dtype=np.float32))
+        self.seq(dummy)
+        
+    def forward(self, state):
+        out = self.seq(state)
+        return ((out + 1) / 2) * tr.tensor((self.outBounds[1] - self.outBounds[0]) + self.outBounds[0],dtype=tr.float32)
+            
+    def softClone(self, other, tau):
+        with tr.no_grad():
+            for x, y in zip(self.parameters(), other.parameters()):
+                x.data.mul_(1-tau)
+                x.data.add_(tau * y.data)
+    
+    def saveCheckPoint(self):
+        tr.save(self.state_dict(), self.savePath)
+        
+    def loadCheckPoint(self):
+        stateDict = tr.load(self.savePath)
+        self.load_state_dict(stateDict)
+
+    def save(self, path):
+        tr.save(self.state_dict(), path)
+    
+    def load(self,path):
+        stateDict = tr.load(path)
+        self.load_state_dict(stateDict)
+    

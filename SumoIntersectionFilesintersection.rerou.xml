@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<additionals>
+	<rerouter id="rrr" edges="ePR">
+		<interval end="1e9">
+			<destProbReroute id="eCP"/>
+		</interval>
+	</rerouter>
+	<rerouter id="rrl" edges="ePL">
+		<interval end="1e9">
+			<destProbReroute id="eCP"/>
+		</interval>
+	</rerouter>
+</additionals>

@@ -1,15 +1,15 @@
 import numpy as np
 
 class ReplayMemory:
-    def __init__(self, capacity, stateDim, actionDim, batchSize):
+    def __init__(self, capacity, stateShape, actionDim, batchSize):
         self.capacity  = capacity
-        self.stateDim  = stateDim
+        self.stateShape  = stateShape
         self.actionDim = actionDim
         self.batchSize = batchSize
         
-        self.states     = np.empty((capacity, stateDim) , dtype=np.float32)
+        self.states     = np.empty((capacity, *stateShape) , dtype=np.float32)
         self.actions    = np.empty((capacity, actionDim), dtype=np.float32)
-        self.nextStates = np.empty((capacity, stateDim) , dtype=np.float32)
+        self.nextStates = np.empty((capacity, *stateShape) , dtype=np.float32)
         self.rewards    = np.empty((capacity, ), dtype=np.float32)
         self.isFinals   = np.empty((capacity, ), dtype=bool)
         self.count = 0
