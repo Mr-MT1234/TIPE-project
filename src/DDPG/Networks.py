@@ -127,13 +127,17 @@ class CriticConvNetwork(trn.Module):
         self.savePath = savePath
 
         self.seqState = trn.Sequential(
-            trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(20,1)),
+            trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(7,1)),
+            trn.MaxPool2d(kernel_size=(2,1), stride=(1,1)),
             trn.ReLU(),
             trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(3,1)),
+            trn.MaxPool2d(kernel_size=(2,1), stride=(2,1)),
+            trn.ReLU(),
+            trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(3,1)),
+            trn.MaxPool2d(kernel_size=(2,1), stride=(2,1)),
             trn.ReLU(),
             trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(3,2)),
             trn.MaxPool2d(kernel_size=(2,1), stride=(2,1)),
-            trn.ReLU(),
             
             trn.Flatten(-3,-1),
             
@@ -184,13 +188,17 @@ class ActorConvNetwork(trn.Module):
         self.savePath = savePath
         
         self.seq = trn.Sequential(
-            trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(20,1)),
+            trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(7,1)),
+            trn.MaxPool2d(kernel_size=(2,1), stride=(1,1)),
             trn.ReLU(),
             trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(3,1)),
+            trn.MaxPool2d(kernel_size=(2,1), stride=(2,1)),
+            trn.ReLU(),
+            trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(3,1)),
+            trn.MaxPool2d(kernel_size=(2,1), stride=(2,1)),
             trn.ReLU(),
             trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(3,2)),
             trn.MaxPool2d(kernel_size=(2,1), stride=(2,1)),
-            trn.ReLU(),
             
             trn.Flatten(-3,-1),
             

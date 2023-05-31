@@ -10,24 +10,19 @@ import os
 
 envName = 'Intersection'
 
-#myParams = IntersectionEnvironment.IDM_CONTROLLER_DEFAULT_PARAMS.copy()
-#myParams['imperfection'] = 1/3000
-#myParams['a'] = 2
-#myParams['b'] = 2
-
 NUM_ITER = 5000
 TIME_STEP = 1/20
 
 env = IntersectionEnv(
-    armLength    = 100,
+    armLength    = 150,
     bodyLength   = 300,
-    spawnRate    = 0.5,
+    spawnRate    = 0.3,
     autoCount    = 3,
     timeStep     = 1/20,
     maxSpeed     = 30,
     turningSpeed = 3,
     maxAccel     = 3,
-    maxIter      = 1000)
+    maxIter      = 10000)
 
 
 totalReward = 0
@@ -36,7 +31,7 @@ done = False
 
 i = 0
 while not done:
-    newObs, reward, terminated, truncated, info = env.step(np.zeros((0,)))
+    newObs, reward, terminated, truncated, info = env.step(np.array([10,1,8,-1,12,1]))
     done = terminated or truncated
     
     obs = newObs
@@ -44,9 +39,9 @@ while not done:
     
     #view = obs[0,:,0].reshape(-1)
     env.render()
-    time.sleep(1/60)
+    time.sleep(1/180)
     i+=1
-    print(f'step:{i}', end = '\r')
+    print(f'step:{i} | reward:{reward}', end = '\r')
 
 print('episode done')
 
@@ -72,7 +67,7 @@ print('episode done')
 # plt.show()
 
 #print(sum([v.cumilativeAccel for v in env.vehicles]))
-    
+
 
         
 
