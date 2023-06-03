@@ -16,21 +16,21 @@ import keyboard
 SAVING = True
 CHECKPOINT_INTERVALLE = 10
 EPISODES = 1000
-AUTO_COUNT = 4
+AUTO_COUNT = 8
 MAX_ITER_INTERVALLE = 50
 
 envName = 'Intersection - 4'
 
 env = IntersectionEnv(
-    armLength    = 100,
-    bodyLength   = 100,
-    spawnRate    = 0.75,
+    armLength    = 450,
+    bodyLength   = 200,
+    spawnRate    = 0.3,
     autoCount    = AUTO_COUNT,
     timeStep     = 1/10,
     maxSpeed     = 30,
     turningSpeed = 3,
-    maxAccel     = 4,
-    maxIter      = 1500
+    maxAccel     = 3,
+    maxIter      = 500
     )
 
 device = tr.device('cpu')
@@ -39,9 +39,7 @@ currentDate = dt.now()
 
 bounds = (env.action_space.low,env.action_space.high)
 actionDim = env.action_space.shape[0]
-agentPath = os.path.join(os.getcwd(), 'agents/agent {}({}-{}-{} {}.{}.{})'.format(
-    envName, currentDate.year,currentDate.month,currentDate.day,currentDate.hour,currentDate.minute, currentDate.second
-    ))
+agentPath = "C:/Users/Tribik/Documents/Mohamed/Etudes/MP/TIPE/Code/Ring/agents/agent Intersection - 4(2023-5-31 8.38.4)"
 
 agent = ConvAgent(
                 device=device,
@@ -60,6 +58,8 @@ agent = ConvAgent(
                 savePath=os.path.join(agentPath,'checkPoint')
             )
 rewards = deque(maxlen=100)
+
+agent.loadCheckPoint()
 
 WARM_UP_STEPS = 10000
 i = 0
@@ -84,7 +84,7 @@ if SAVING:
         os.makedirs(agentPath)
     if not os.path.exists(agent.savePath):
         os.makedirs(agent.savePath)
-    log = open(os.path.join(agentPath, 'log.txt'),'w')
+    log = open(os.path.join(agentPath, 'log.txt'),'a')
     
 shouldSave = False
 shouldRender = True
@@ -124,9 +124,6 @@ def train():
             if (now - last) > 1/30 and shouldRender:
                 env.render()
                 last = now
-                
-            if keyboard.is_pressed('G'):
-                env.renderState = not env.renderState
 
         rewards.append(totalReward)
         
@@ -147,10 +144,9 @@ def train():
             
         if episode % CHECKPOINT_INTERVALLE == 0 and SAVING:
             agent.saveCheckPoint()
-        # if episode % MAX_ITER_INTERVALLE == 0:
-        #     env.maxIter += 500
-        #     env.maxIter = min(env.maxIter, 7000) 
-            
+        if episode % MAX_ITER_INTERVALLE == 0:
+            env.maxIter += 500
+            env.maxIter = min(env.maxIter, 7000) 
 
 SnapshotID = 0
 

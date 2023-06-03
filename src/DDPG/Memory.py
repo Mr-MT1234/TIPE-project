@@ -28,7 +28,7 @@ class ReplayMemory:
     def sample(self):
         assert self.batchSize <= self.count , 'Not enough data'
         
-        batchIndeces = np.random.choice(self.count, size=self.batchSize, replace=False)
+        batchIndeces = np.random.choice(min(self.count, self.capacity), size=self.batchSize, replace=False)
         
         return (
                 self.states[batchIndeces],

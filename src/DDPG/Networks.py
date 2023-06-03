@@ -127,26 +127,24 @@ class CriticConvNetwork(trn.Module):
         self.savePath = savePath
 
         self.seqState = trn.Sequential(
-            trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(7,1)),
-            trn.MaxPool2d(kernel_size=(2,1), stride=(1,1)),
+            trn.Conv3d(in_channels=1, out_channels=3, kernel_size=(3,5,1)),
+            trn.MaxPool3d(kernel_size=(1,2,1), stride=(1,1,1)),
             trn.ReLU(),
-            trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(3,1)),
-            trn.MaxPool2d(kernel_size=(2,1), stride=(2,1)),
+            trn.Conv3d(in_channels=3, out_channels=3, kernel_size=(3,3,1), groups=3),
+            trn.MaxPool3d(kernel_size=(1,2,1), stride=(1,1,1)),
             trn.ReLU(),
-            trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(3,1)),
-            trn.MaxPool2d(kernel_size=(2,1), stride=(2,1)),
+            trn.Conv3d(in_channels=3, out_channels=3, kernel_size=(2,3,2), groups=3),
+            trn.MaxPool3d(kernel_size=(1,2,1), stride=(1,2,1)),
             trn.ReLU(),
-            trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(3,2)),
-            trn.MaxPool2d(kernel_size=(2,1), stride=(2,1)),
             
-            trn.Flatten(-3,-1),
+            trn.Flatten(-4,-1),
             
             trn.LazyLinear(out_features=100),
             trn.ReLU(),
             trn.Linear(in_features=100,out_features=100),
         ).to(device)
         
-        dummy = tr.tensor(np.empty(stateShape,dtype=np.float32))
+        dummy = tr.tensor(np.empty((1,*stateShape),dtype=np.float32))
         self.seqState(dummy)
         
         self.linearAction = trn.Linear(in_features=actionDim,out_features=100, device=device)
@@ -188,19 +186,17 @@ class ActorConvNetwork(trn.Module):
         self.savePath = savePath
         
         self.seq = trn.Sequential(
-            trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(7,1)),
-            trn.MaxPool2d(kernel_size=(2,1), stride=(1,1)),
+            trn.Conv3d(in_channels=1, out_channels=3, kernel_size=(3,5,1)),
+            trn.MaxPool3d(kernel_size=(1,2,1), stride=(1,1,1)),
             trn.ReLU(),
-            trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(3,1)),
-            trn.MaxPool2d(kernel_size=(2,1), stride=(2,1)),
+            trn.Conv3d(in_channels=3, out_channels=3, kernel_size=(3,3,1), groups=3),
+            trn.MaxPool3d(kernel_size=(1,2,1), stride=(1,1,1)),
             trn.ReLU(),
-            trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(3,1)),
-            trn.MaxPool2d(kernel_size=(2,1), stride=(2,1)),
+            trn.Conv3d(in_channels=3, out_channels=3, kernel_size=(2,3,2), groups=3),
+            trn.MaxPool3d(kernel_size=(1,2,1), stride=(1,2,1)),
             trn.ReLU(),
-            trn.Conv2d(in_channels=5, out_channels=5, kernel_size=(3,2)),
-            trn.MaxPool2d(kernel_size=(2,1), stride=(2,1)),
             
-            trn.Flatten(-3,-1),
+            trn.Flatten(-4,-1),
             
             trn.LazyLinear(out_features=100),
             trn.ReLU(),
@@ -210,10 +206,10 @@ class ActorConvNetwork(trn.Module):
             trn.Tanh(),
         ).to(device)
         
-        dummy = tr.tensor(np.empty(stateShape,dtype=np.float32))
+        dummy = tr.tensor(np.empty((1,*stateShape),dtype=np.float32))
         self.seq(dummy)
         
-    def forward(self, state):
+    def forward(self, state):    
         out = self.seq(state)
         return ((out + 1) / 2) * tr.tensor((self.outBounds[1] - self.outBounds[0]) + self.outBounds[0],dtype=tr.float32)
             

@@ -67,13 +67,14 @@ class SteadyController(Controller):
     def __init__(self, maxAccel, desSpeed):
         self.desSpeed = desSpeed
         self.maxAccel = maxAccel
+        self.T = 0
         
     def setDesiredSpeed(self, speed):
         self.desSpeed = speed
     
     def calcAcceleration(self, dt, speed, leaderSpeed, distance, followerSpeed, distanceToFollower):
         speedGoal = self.desSpeed
-        impact = distance / (self.desSpeed - leaderSpeed)
+        impact = distance / (speed - leaderSpeed)
         if impact < (speed / self.maxAccel): speedGoal = min(leaderSpeed, self.desSpeed)
         a = np.clip(((speedGoal - speed)/dt), -self.maxAccel, self.maxAccel)
         return a

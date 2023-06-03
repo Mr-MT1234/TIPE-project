@@ -1,6 +1,6 @@
 import IntersectionEnvironment
 from IntersectionEnvironmentSumo import IntersectionEnv
-from RingEnvironmentSimple import RingEnvAILess
+from RingEnvironmentSimple import *
 #from RingEnvironmentSimple import *
 import numpy as np
 import time
@@ -11,7 +11,7 @@ import os
 
 envName = 'Ring'
 
-myParams = IntersectionEnvironment.IDM_CONTROLLER_DEFAULT_PARAMS.copy()
+myParams = IDM_CONTROLLER_DEFAULT_PARAMS.copy()
 myParams['imperfection'] = 1/3000
 myParams['a'] = 2
 myParams['b'] = 2
@@ -31,7 +31,7 @@ TIME_STEP = 1/20
 env = RingEnvAILess(
     50,
     25,
-    2,
+    1,
     20,
     2,
     TIME_STEP,
@@ -42,7 +42,7 @@ env = RingEnvAILess(
 )
 
 
-#env.InitRender()
+env.InitRender()
 
 totalReward = 0
 obs, info = env.reset()
@@ -57,8 +57,8 @@ while not done:
     totalReward += reward
     
     #view = obs[0,:,0].reshape(-1)
-    #env.render()
-    #time.sleep(1/60)
+    env.render()
+    time.sleep(1/60)
     i+=1
     print(f'step:{i}', end = '\r')
 
