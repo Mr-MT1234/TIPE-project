@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-path = "C:/Users/Tribik/Documents/Mohamed/Etudes/MP/TIPE/Code/Ring/agents/agent Pendalum(2023-4-4 14.36.13)/log.txt"
+path = "C:/Users/Tribik/Documents/Mohamed/Etudes/MP/TIPE/Code/Ring/agents/agent Intersection - 4(2023-6-2 23.43.21)/log.txt"
 
 f = open(path, 'r')
 
@@ -12,8 +12,8 @@ for ligne in f:
     reward = float(rewardText.split(':')[1])
     L.append(reward)
 
-L = np.array(L)
-A = np.array([ sum(L[max(0,i - 75): i+1]) / min(75,i+1) for i in range(len(L)) ])
+L = np.array(L)*10
+A = np.array([ sum(L[max(0,i - 100): i+1]) / min(100,i+1) for i in range(len(L)) ])
 
 #V = np.array([ sum((L[max(0,i - 100): i+1] - A[i])**2) / min(100,i+1) for i in range(len(L)) ])
 
@@ -21,5 +21,7 @@ A = np.array([ sum(L[max(0,i - 75): i+1]) / min(75,i+1) for i in range(len(L)) ]
 
 plt.plot(L,alpha=0.5)
 plt.plot(A)
-plt.legend(['Récompense', 'Moyenne sur les dérniers 75 episodes'])
+plt.legend(['Récompense', 'Moyenne sur les dérniers 100 episodes'])
+plt.xlabel('épisode')
+plt.ylabel('Récompense')
 plt.show()

@@ -26,7 +26,7 @@ LEFT_DIRECT = -1
 RIGHT_DIRECT = 1
 UP_DIRECT = 0
 
-OBSERVATION_RES = 50
+OBSERVATION_RES = 64
 
 MAX_CARS_PER_ARM = 10
 
@@ -114,7 +114,7 @@ class IntersectionEnv(gym.Env):
         self.turnTime = np.pi  * ROAD_WIDTH / (4*turningSpeed)
         
         self.currentIter = 0
-        self.lastIntersectionTraversal = RIGHT_DIRECT
+        self.traversalCount = 1
         
         self.metadata['render_modes'] = {'human','none'}
         self.observation_space = gym.spaces.Box(
@@ -141,6 +141,7 @@ class IntersectionEnv(gym.Env):
         self.lastAction = 0
         self.lastReward = 0
         self.lastState = []
+    
     def render(self):
         for _ in pg.event.get():
             pass
@@ -238,8 +239,8 @@ class IntersectionEnv(gym.Env):
         
         if np.random.random() < self.spawnRate*self.timeStep:
             v = Vehicle(history=[], direction=0,visualID=1,creationIter=self.currentIter)
-            s = np.sin(self.currentIter / self.maxIter *2*np.pi*15)
-            if s > 0:
+            s = np.random.random()
+            if s > 0.5:
                 if (not self.rightHand or self.rightHand[-1].position > 5) and len(self.rightArm) < MAX_CARS_PER_ARM:
                     v.direction = RIGHT_DIRECT
                     self.rightHand.append(v)
@@ -264,13 +265,11 @@ class IntersectionEnv(gym.Env):
                 i = v.visualID - 2
                 v.position = 0
                 if action[2*i+1] > 0: 
-                    v.direction = RIGHT_DIRECT
+                    v.direction = LEFT_DIRECT
                     self.rightReturn.append(v)
                 else:
-                    v.direction = LEFT_DIRECT
+                    v.direction = RIGHT_DIRECT
                     self.leftReturn.append(v)
-            else:
-                reward += 300
                 
         if self.leftHand and self.leftHand[0].position > self.bodyLength and (not self.leftArm or self.leftArm[-1].position > 2):
             v = self.leftHand.popleft()
@@ -303,7 +302,15 @@ class IntersectionEnv(gym.Env):
         if self.intersectionQueue and not self.intersection and (not self.body or self.body[-1].position > 2):
             next, current = self.intersectionQueue.popleft()
             next = self.rightArm.popleft() if current == RIGHT_DIRECT else self.leftArm.popleft()
-            next.timeInIntersection = self.turnTime + SWITCH_DELAY*(current != self.lastIntersectionTraversal)
+            next.timeInIntersection = self.turnTime
+            
+            if current/abs(current) != self.traversalCount / abs(self.traversalCount):
+                next.timeInIntersection += SWITCH_DELAY
+                self.traversalCount = current
+            else:
+                self.traversalCount += current
+                reward += min(7,abs(self.traversalCount))*100
+                
             self.intersection.append(next)
             self.lastIntersectionTraversal = current
             
@@ -379,7 +386,7 @@ class IntersectionEnv(gym.Env):
         if self.intersection:
             reward -= 1
                 
-        reward = reward / 1000
+        reward = reward / 100
         self.lastReward = reward
         
         
@@ -392,6 +399,8 @@ class IntersectionEnv(gym.Env):
         
         self.leftArm.clear()
         self.rightArm.clear()
+        self.rightHand.clear()
+        self.rightHand.clear()
         self.body.clear()
         self.rightReturn.clear()
         self.leftReturn.clear()
@@ -436,7 +445,7 @@ class IntersectionEnv(gym.Env):
         
         intersectionData = (0,0)
         if self.intersection:
-            intersectionData = (self.intersection[0].visualID, self.intersection[0].timeInIntersection)
+            intersectionData = (self.intersection[0].visualID, np.clip(self.traversalCount,-7,7))
         for i in range(OBSERVATION_RES):
             state[0,-1,i] = intersectionData
             

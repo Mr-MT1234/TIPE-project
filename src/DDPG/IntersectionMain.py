@@ -16,10 +16,10 @@ import keyboard
 SAVING = True
 CHECKPOINT_INTERVALLE = 10
 EPISODES = 1000
-AUTO_COUNT = 4
+AUTO_COUNT = 3
 MAX_ITER_INTERVALLE = 50
 
-envName = 'Intersection - 4'
+envName = 'Intersection - 4 reward - 2'
 
 env = IntersectionEnv(
     armLength    = 100,
@@ -30,8 +30,8 @@ env = IntersectionEnv(
     maxSpeed     = 30,
     turningSpeed = 3,
     maxAccel     = 4,
-    maxIter      = 1500
-    )
+    maxIter      = 2000
+)
 
 device = tr.device('cpu')
 
@@ -41,7 +41,8 @@ bounds = (env.action_space.low,env.action_space.high)
 actionDim = env.action_space.shape[0]
 agentPath = os.path.join(os.getcwd(), 'agents/agent {}({}-{}-{} {}.{}.{})'.format(
     envName, currentDate.year,currentDate.month,currentDate.day,currentDate.hour,currentDate.minute, currentDate.second
-    ))
+    )
+)
 
 agent = ConvAgent(
                 device=device,
