@@ -15,10 +15,6 @@ for ligne in f:
 L = np.array(L)*10
 A = np.array([ sum(L[max(0,i - 100): i+1]) / min(100,i+1) for i in range(len(L)) ])
 
-#V = np.array([ sum((L[max(0,i - 100): i+1] - A[i])**2) / min(100,i+1) for i in range(len(L)) ])
-
-#sigma = np.sqrt(V)
-
 plt.plot(L,alpha=0.5)
 plt.plot(A)
 plt.legend(['Récompense', 'Moyenne sur les dérniers 100 episodes'])
